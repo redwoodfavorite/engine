@@ -23,7 +23,6 @@
  */
 
 #pragma glslify: applyMaterial = require(./chunks/applyMaterial)
-#pragma glslify: applyLight = require(./chunks/applyLight)
 
 
 /**
@@ -34,6 +33,40 @@
  *
  *
  */
+
+
+ vec4 applyLight(vec4 material, vec4 glossiness) {
+    vec3 ambientColor = u_ambientLight * material.rgb;
+    vec3 normal = normalize(v_normal);
+    int numLights = int(u_numLights);
+    vec3 eyeVector = normalize(v_eyeVector);
+    mat4 lightPosition = u_lightPosition;
+    mat4 lightColor = u_lightColor;
+
+    vec3 diffuse = vec3(0.0);
+    bool hasGlossiness = glossiness.a > 0.0;
+    bool hasSpecularColor = length(glossiness.rgb) > 0.0;
+
+    //for(int i = 0; i < 4; i++) {
+      //if (i >= numLights) break;
+       const int i = 0;
+        vec3 lightDirection = normalize(lightPosition[i].xyz - v_position);
+        float lambertian = max(dot(lightDirection, normal), 0.0);
+        if (lambertian > 0.0) {
+            diffuse += lightColor[i].rgb * material.rgb * lambertian;
+            if (hasGlossiness) {
+                vec3 halfVector = normalize(lightDirection + eyeVector);
+                float specularWeight = pow(max(dot(halfVector, normal), 0.0), glossiness.a);
+                vec3 specularColor = hasSpecularColor ? glossiness.rgb : lightColor[i].rgb;
+                diffuse += specularColor * specularWeight * lambertian;
+           }
+        }
+
+    //}
+
+    return vec4(ambientColor + diffuse, material.a);
+}
+
 void main() {
     vec4 material = u_baseColor.r >= 0.0 ? u_baseColor : applyMaterial(u_baseColor);
 
@@ -46,15 +79,7 @@ void main() {
     vec3 normal = normalize(v_normal);
     vec4 glossiness = u_glossiness.x < 0.0 ? applyMaterial(u_glossiness) : u_glossiness;
 
-    vec4 color = lightsEnabled ?
-    applyLight(material, normalize(v_normal), glossiness,
-               int(u_numLights),
-               u_ambientLight * u_baseColor.rgb,
-               normalize(v_eyeVector),
-               u_lightPosition,
-               u_lightColor,   
-               v_position)
-    : material;
+    vec4 color = lightsEnabled ? applyLight(material, glossiness) : material;
 
     gl_FragColor = color;
     gl_FragColor.a *= u_opacity;   
