@@ -27,6 +27,15 @@
 var css = '.famous-dom-renderer {' +
     'width:100%;' +
     'height:100%;' +
+    // 'transform-origin: 0% 0%;' + 
+    'transform-style:preserve-3d;' +
+    '-webkit-transform-style:preserve-3d;' +
+'}' +
+
+'.famous-view-el {' +
+    'width:100%;' +
+    'height:100%;' +
+    'transform-origin: 0% 0%;' + 
     'transform-style:preserve-3d;' +
     '-webkit-transform-style:preserve-3d;' +
 '}' +

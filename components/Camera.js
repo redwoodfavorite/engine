@@ -25,6 +25,8 @@
 'use strict';
 
 var Commands = require('../core/Commands');
+var TransformSystem = require('../core/TransformSystem');
+var mat4 = require('gl-matrix').mat4;
 
 /**
  * Camera is a component that is responsible for sending information to the renderer about where
@@ -53,6 +55,12 @@ Camera.FRUSTUM_PROJECTION = 0;
 Camera.PINHOLE_PROJECTION = 1;
 Camera.ORTHOGRAPHIC_PROJECTION = 2;
 
+Camera.prototype.onMount = function onMount (node, id) {
+    this._node = node;
+    this._id = id;
+
+    TransformSystem.makeBreakPointAt(node.getLocation());
+};
 /**
  * @method
  *
@@ -264,7 +272,8 @@ Camera.prototype.onUpdate = function onUpdate() {
  * @return {Camera} this
  */
 Camera.prototype.onTransformChange = function onTransformChange(transform) {
-    var a = transform.local;
+    var a = transform.getWorldTransform()
+
     this._viewDirty = true;
 
     if (!this._requestingUpdate) {
@@ -272,42 +281,52 @@ Camera.prototype.onTransformChange = function onTransformChange(transform) {
         this._requestingUpdate = true;
     }
 
-    var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
-    a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
-    a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
-    a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15],
+    // a30 += this._focalDepth;
+    // a31 -= innerWidth * 0.5;
+    // a32 -= innerHeight * 0.5;
 
-    b00 = a00 * a11 - a01 * a10,
-    b01 = a00 * a12 - a02 * a10,
-    b02 = a00 * a13 - a03 * a10,
-    b03 = a01 * a12 - a02 * a11,
-    b04 = a01 * a13 - a03 * a11,
-    b05 = a02 * a13 - a03 * a12,
-    b06 = a20 * a31 - a21 * a30,
-    b07 = a20 * a32 - a22 * a30,
-    b08 = a20 * a33 - a23 * a30,
-    b09 = a21 * a32 - a22 * a31,
-    b10 = a21 * a33 - a23 * a31,
-    b11 = a22 * a33 - a23 * a32,
+    mat4.invert(this._viewTransform, a);
 
-    det = 1/(b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
+    this._viewTransform[12] += innerWidth * 0.5;
+    this._viewTransform[13] += innerHeight * 0.5;
+    this._viewTransform[14] += this._focalDepth;
 
-    this._viewTransform[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
-    this._viewTransform[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
-    this._viewTransform[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det;
-    this._viewTransform[3] = (a22 * b04 - a21 * b05 - a23 * b03) * det;
-    this._viewTransform[4] = (a12 * b08 - a10 * b11 - a13 * b07) * det;
-    this._viewTransform[5] = (a00 * b11 - a02 * b08 + a03 * b07) * det;
-    this._viewTransform[6] = (a32 * b02 - a30 * b05 - a33 * b01) * det;
-    this._viewTransform[7] = (a20 * b05 - a22 * b02 + a23 * b01) * det;
-    this._viewTransform[8] = (a10 * b10 - a11 * b08 + a13 * b06) * det;
-    this._viewTransform[9] = (a01 * b08 - a00 * b10 - a03 * b06) * det;
-    this._viewTransform[10] = (a30 * b04 - a31 * b02 + a33 * b00) * det;
-    this._viewTransform[11] = (a21 * b02 - a20 * b04 - a23 * b00) * det;
-    this._viewTransform[12] = (a11 * b07 - a10 * b09 - a12 * b06) * det;
-    this._viewTransform[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det;
-    this._viewTransform[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det;
-    this._viewTransform[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+    // var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
+    // a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
+    // a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
+    // a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+
+    // var b00 = a00 * a11 - a01 * a10,
+    // b01 = a00 * a12 - a02 * a10,
+    // b02 = a00 * a13 - a03 * a10,
+    // b03 = a01 * a12 - a02 * a11,
+    // b04 = a01 * a13 - a03 * a11,
+    // b05 = a02 * a13 - a03 * a12,
+    // b06 = a20 * a31 - a21 * a30,
+    // b07 = a20 * a32 - a22 * a30,
+    // b08 = a20 * a33 - a23 * a30,
+    // b09 = a21 * a32 - a22 * a31,
+    // b10 = a21 * a33 - a23 * a31,
+    // b11 = a22 * a33 - a23 * a32,
+
+    // det = 1/(b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
+
+    // this._viewTransform[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+    // this._viewTransform[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+    // this._viewTransform[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+    // this._viewTransform[3] = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+    // this._viewTransform[4] = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+    // this._viewTransform[5] = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+    // this._viewTransform[6] = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+    // this._viewTransform[7] = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+    // this._viewTransform[8] = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+    // this._viewTransform[9] = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+    // this._viewTransform[10] = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+    // this._viewTransform[11] = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+    // this._viewTransform[12] = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+    // this._viewTransform[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+    // this._viewTransform[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+    // this._viewTransform[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
 };
 
 module.exports = Camera;

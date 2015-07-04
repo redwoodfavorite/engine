@@ -157,7 +157,7 @@ Program.prototype.registerMaterial = function registerMaterial(name, material) {
     var type = inputTypes[name];
     var mask = masks[type];
 
-    if ((this.registeredMaterials[material._id] & mask) === mask) return this;
+    if ((this.registeredMaterials[material._id] & mask) === mask) return false;
 
     var k;
 
@@ -208,7 +208,7 @@ Program.prototype.registerMaterial = function registerMaterial(name, material) {
         this.applicationVert.push('if (int(abs(ID.x)) == ' + material._id + ') return fa_' + material._id + '();');
     }
 
-    return this.resetProgram();
+    return true;
 };
 
 /**

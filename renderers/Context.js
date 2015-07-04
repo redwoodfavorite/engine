@@ -68,7 +68,7 @@ function Context(selector, compositor) {
 
     // WebGLRenderer will be instantiated when needed.
     this._webGLRenderer = null;
-    this._domRenderer = new DOMRenderer(this._domRendererRootEl, selector, compositor);
+    this._domRendererRootEl.transformOrigin = '0% 0%';
     this._canvasEl = null;
     
     // State holders

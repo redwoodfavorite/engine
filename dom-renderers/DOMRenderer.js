@@ -49,6 +49,13 @@ function DOMRenderer (element, selector, compositor) {
     var _this = this;
 
     element.classList.add('famous-dom-renderer');
+    this._perspectiveEl = element;
+    this._viewEl = document.createElement('div');
+    this._viewEl.classList.add('famous-view-el');
+    this._perspectiveEl.appendChild(this._viewEl);
+
+    var element = this._viewEl;
+
 
     TRANSFORM = TRANSFORM || vendorPrefix('transform');
     this._compositor = compositor; // a reference to the compositor
@@ -68,7 +75,7 @@ function DOMRenderer (element, selector, compositor) {
     this._children = []; // a register for holding the children of the
                          // current target.
 
-    this._root = new ElementCache(element, selector); // the root
+    this._root = new ElementCache(this._viewEl, selector); // the root
                                                       // of the dom tree that this
                                                       // renderer is responsible
                                                       // for
@@ -85,7 +92,7 @@ function DOMRenderer (element, selector, compositor) {
 
     this.perspectiveTransform = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
     this._VPtransform = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-
+    this._viewTransform = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
     this._lastEv = null;
 }
 
@@ -289,6 +296,12 @@ function _getPath(ev) {
  *
  * @return {undefined} undefined
  */
+ var originTransform = [
+    1, 0, 0, 1,
+    0, 1, 0, -1,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+ ];
 DOMRenderer.prototype.draw = function draw(renderState) {
     if (renderState.perspectiveDirty) {
         this.perspectiveDirty = true;
@@ -315,8 +328,10 @@ DOMRenderer.prototype.draw = function draw(renderState) {
     }
 
     if (renderState.viewDirty || renderState.perspectiveDirty) {
-        math.multiply(this._VPtransform, this.perspectiveTransform, renderState.viewTransform);
-        this._root.element.style[TRANSFORM] = this._stringifyMatrix(this._VPtransform);
+        // math.multiply(this._viewTransform, renderState.viewTransform, originTransform);
+        // math.multiply(this._VPtransform, this.perspectiveTransform);
+        this._perspectiveEl.style[TRANSFORM] = this._stringifyMatrix(this.perspectiveTransform);
+        this._viewEl.style[TRANSFORM] = this._stringifyMatrix(renderState.viewTransform);
     }
 };
 
@@ -652,8 +667,10 @@ DOMRenderer.prototype.setContent = function setContent(content) {
  *
  * @return {undefined} undefined
  */
+ // var out = []
 DOMRenderer.prototype.setMatrix = function setMatrix (transform) {
     this._assertTargetLoaded();
+
     this._target.element.style[TRANSFORM] = this._stringifyMatrix(transform);
 };
 

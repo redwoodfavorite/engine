@@ -420,6 +420,17 @@ WebGLRenderer.prototype.setLightColor = function setLightColor(path, r, g, b) {
     return this;
 };
 
+WebGLRenderer.prototype.resetProgram = function resetProgram() {
+    this.state = {
+        boundArrayBuffer: null,
+        boundElementBuffer: null,
+        lastDrawn: null,
+        enabledAttributes: {},
+        enabledAttributesKeys: []
+    };
+
+    this.program.resetProgram();
+}
 /**
  * Compiles material spec into program shader
  *
@@ -450,7 +461,8 @@ WebGLRenderer.prototype.handleMaterialInput = function handleMaterialInput(path,
 
     // Register material!
 
-    this.program.registerMaterial(name, material);
+    var needReset = this.program.registerMaterial(name, material);
+    if (needReset) this.resetProgram();
 
     return this.updateSize();
 };
@@ -682,6 +694,12 @@ WebGLRenderer.prototype.setGlobalUniforms = function setGlobalUniforms(renderSta
     this.projectionTransform[5] = -1 / (this.cachedSize[1] * 0.5);
     this.projectionTransform[11] = renderState.perspectiveTransform[11];
 
+    // var viewTransform = [];
+    // for (var i = 0; i < renderState.viewTransform.length; i++) {
+    //     viewTransform[i] = renderState.viewTransform[i];
+    //     if (i === 12) viewTransform[i] += innerWidth * 0.5;
+    //     if (i === 12) viewTransform[i] += innerWidth * 0.5;
+    // }
     globalUniforms.values[4] = this.projectionTransform;
     globalUniforms.values[5] = this.compositor.getTime() * 0.001;
     globalUniforms.values[6] = renderState.viewTransform;
@@ -764,7 +782,9 @@ WebGLRenderer.prototype.drawBuffers = function drawBuffers(vertexBuffers, mode, 
     for (i = 0; i < len; i++) {
         var key = this.state.enabledAttributesKeys[i];
         if (this.state.enabledAttributes[key] && vertexBuffers.keys.indexOf(key) === -1) {
+            if(this.program.attributeLocations[key] === undefined) debugger;
             gl.disableVertexAttribArray(this.program.attributeLocations[key]);
+            this.state.enabledAttributesKeys.splice(i, 1);
             this.state.enabledAttributes[key] = false;
         }
     }
