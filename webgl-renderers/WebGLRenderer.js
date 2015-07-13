@@ -47,7 +47,8 @@ var globalUniforms = keyValueToArrays({
 
 var meshTransforms = keyValueToArrays({
     'u_mvMatrix': new Array(16),
-    'u_normalMatrix': new Array(9)
+    'u_normalMatrix': new Array(9),
+    'u_mMatrix': new Array(16)
 });
 
 /**
@@ -599,6 +600,7 @@ WebGLRenderer.prototype.drawMeshes = function drawMeshes(renderState) {
 
         // Normal Matrix calculated from the Model View Matrix
         mat33.normalFromMat4(meshTransforms.values[1], mesh.uniformValues[1]);
+        mat44.copy(meshTransforms.values[2], mesh.uniformValues[1]);
 
         this.program.setUniforms(mesh.uniformKeys, mesh.uniformValues);
         this.program.setUniforms(meshTransforms.keys, meshTransforms.values);
@@ -871,6 +873,10 @@ WebGLRenderer.prototype.handleOptions = function handleOptions(options, mesh) {
         this.gl.cullFace(this.gl.BACK);
     }
 
+    if (options.side === 'both') {
+        gl.disable(gl.CULL_FACE);
+    }
+
     if (options.side === 'back') gl.cullFace(gl.FRONT);
 };
 
@@ -888,6 +894,9 @@ WebGLRenderer.prototype.resetOptions = function resetOptions(options) {
     if (!options) return;
     if (options.blending) gl.disable(gl.BLEND);
     if (options.side === 'back') gl.cullFace(gl.BACK);
+    if (options.side === 'both') {
+        gl.enable(gl.CULL_FACE);
+    }
 };
 
 module.exports = WebGLRenderer;

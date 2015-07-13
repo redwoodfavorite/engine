@@ -68,6 +68,7 @@ var uniforms = keyValueToArrays({
     u_perspective: identityMatrix,
     u_mvMatrix: identityMatrix,
     u_resolution: [0, 0, 0],
+    u_mMatrix: identityMatrix,
     u_normalMatrix: [0, 0, 0, 0, 0, 0, 0, 0, 0],
     u_size: [1, 1, 1],
     u_time: 0,

@@ -110,7 +110,8 @@ void main() {
     offsetPos = (u_positionOffset.x < 0.0) ? a_pos + calculateOffset(u_positionOffset) : a_pos;
     offsetPos = clipSpacePos(offsetPos);
     mvPos = u_mvMatrix * vec4(offsetPos, 1.0);
-    v_position = mvPos.xyz;
+    vec3 mPos = (u_mMatrix * vec4(offsetPos, 1.0)).xyz;
+    v_position = mPos;
     v_eyeVector = (u_resolution * 0.5) - v_position;
 
     gl_Position = u_perspective * mvPos;
