@@ -250,7 +250,16 @@ WebGLRenderer.prototype.createMesh = function createMesh(path) {
 WebGLRenderer.prototype.setCutoutState = function setCutoutState(path, usesCutout) {
     var cutout = this.getOrSetCutout(path);
 
-    cutout.visible = usesCutout;
+    if (typeof usesCutout === 'object') {
+        if (usesCutout.size) {
+            cutout.uniformValues[2][0] = usesCutout.size[0];
+            cutout.uniformValues[2][1] = usesCutout.size[1];
+            cutout.uniformValues[2][2] = usesCutout.size[2];
+        }
+    }
+
+    else
+        cutout.visible = usesCutout;
 };
 
 /**
@@ -333,10 +342,10 @@ WebGLRenderer.prototype.setCutoutUniform = function setCutoutUniform(path, unifo
     var cutout = this.getOrSetCutout(path);
 
     var index = cutout.uniformKeys.indexOf(uniformName);
-
     if (uniformValue.length) {
         for (var i = 0, len = uniformValue.length; i < len; i++) {
-            cutout.uniformValues[index][i] = uniformValue[i];
+            if (uniformValue[i] !== false)
+                cutout.uniformValues[index][i] = uniformValue[i];
         }
     }
     else {
@@ -503,7 +512,6 @@ WebGLRenderer.prototype.setGeometry = function setGeometry(path, geometry, drawT
 **/
 WebGLRenderer.prototype.setMeshUniform = function setMeshUniform(path, uniformName, uniformValue) {
     var mesh = this.meshRegistry[path] || this.createMesh(path);
-
     var index = mesh.uniformKeys.indexOf(uniformName);
 
     if (index === -1) {
@@ -626,7 +634,7 @@ WebGLRenderer.prototype.drawCutouts = function drawCutouts(renderState) {
 
     if (!len) return;
 
-    this.gl.disable(this.gl.CULL_FACE);
+    this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.BLEND);
     this.gl.depthMask(true);
 
@@ -832,7 +840,7 @@ WebGLRenderer.prototype.drawBuffers = function drawBuffers(vertexBuffers, mode, 
  */
 WebGLRenderer.prototype.updateSize = function updateSize(size) {
     if (size) {
-        var pixelRatio = window.devicePixelRatio || 1;
+        var pixelRatio = 1;
         var displayWidth = ~~(size[0] * pixelRatio);
         var displayHeight = ~~(size[1] * pixelRatio);
         this.canvas.width = displayWidth;

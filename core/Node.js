@@ -681,11 +681,11 @@ Node.prototype.removeChild = function removeChild (child) {
     var index = this._children.indexOf(child);
 
     if (index > - 1) {
-        this._freedChildIndicies.push(index);
-
-        this._children[index] = null;
 
         if (child.isMounted()) child.dismount();
+
+        this._freedChildIndicies.push(index);
+        this._children[index] = null;
 
         return true;
     } else throw new Error('Node is not a child of this node');

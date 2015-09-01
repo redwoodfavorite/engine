@@ -60,7 +60,7 @@ void main() {
     vec4 glossiness = u_glossiness.x < 0.0 ? applyMaterial(u_glossiness) : u_glossiness;
     int numLights = int(u_numLights);
     vec3 eyeVector = normalize(v_eyeVector);
-    vec3 ambience = u_ambientLight * u_baseColor.rgb;
+    vec3 ambience = u_ambientLight * material.rgb;
 
     vec4 color = !lightsEnabled ? material :
         applyLight(material, normal, glossiness, numLights, ambience,

@@ -163,7 +163,10 @@ Program.prototype.registerMaterial = function registerMaterial(name, material) {
     var k;
 
     for (k in compiled.uniforms) {
-        if (uniforms.keys.indexOf(k) === -1) {
+
+        // I'm sorry
+
+        if (uniforms.keys.indexOf(k) === -1 && k === 'u_matrices[5]') {
             uniforms.keys.push(k);
             uniforms.values.push(compiled.uniforms[k]);
         }
@@ -254,7 +257,7 @@ Program.prototype.resetProgram = function resetProgram() {
     fragmentHeader.push('uniform sampler2D u_textures[7];\n');
 
     if (this.applicationVert.length) {
-        vertexHeader.push('uniform sampler2D u_textures[7];\n');
+        vertexHeader.push('uniform sampler2D u_textures[7];\nuniform mat4 u_boneMatrices[5];\n');
     }
 
     for(i = 0; i < this.uniformNames.length; i++) {
@@ -397,8 +400,13 @@ Program.prototype.setUniforms = function (uniformNames, uniformValue) {
 
         if (location === null) continue;
         if (location === undefined) {
-            location = gl.getUniformLocation(this.program, name);
-            this.uniformLocations[name] = location;
+            if (name === 'u_boneMatrices[5]') {
+                location = gl.getUniformLocation(this.program, 'u_boneMatrices[0]');
+            }
+            else {
+                location = gl.getUniformLocation(this.program, name);
+            }
+                this.uniformLocations[name] = location;
         }
 
         // Check if the value is already set for the
@@ -448,6 +456,7 @@ Program.prototype.getUniformTypeFromValue = function getUniformTypeFromValue(val
             case 4:  return 'uniform4fv';
             case 9:  return 'uniformMatrix3fv';
             case 16: return 'uniformMatrix4fv';
+            case 80: return 'uniformMatrix4fv';
         }
     }
     else if (!isNaN(parseFloat(value)) && isFinite(value)) {

@@ -357,6 +357,7 @@ function changeSize (context, path, commands, iterator) {
     var height = commands[++iterator];
 
     context._domRenderer.setSize(width, height);
+    
     if (context._webGLRenderer) {
         context._meshSize[0] = width;
         context._meshSize[1] = height;

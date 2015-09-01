@@ -56,7 +56,7 @@ function Mesh (node, options) {
         flatShading: null,
         glossiness: null,
         positionOffset: null,
-        normals: null
+        normals: null,
     };
 
     if (options) this.setDrawOptions(options);
@@ -242,6 +242,15 @@ Mesh.prototype.getFlatShading = function getFlatShading () {
     return this.value.flatShading;
 };
 
+Mesh.prototype.setUniform = function setUniform(name, value) {
+    if (this._initialized) {
+        this._changeQueue.push(Commands.GL_UNIFORMS);
+        this._changeQueue.push(name);
+        this._changeQueue.push(value);
+    }
+
+    this._requestUpdate();
+}
 
 /**
  * Defines a 3-element map which is used to provide significant physical
@@ -435,6 +444,7 @@ Mesh.prototype.onUpdate = function onUpdate() {
     var queue = this._changeQueue;
 
     if (node) {
+        if (node.getLocation() === null) return;
         node.sendDrawCommand(Commands.WITH);
         node.sendDrawCommand(node.getLocation());
 
@@ -496,10 +506,11 @@ Mesh.prototype.onMount = function onMount (node, id) {
  * @return {undefined} undefined
  */
 Mesh.prototype.onDismount = function onDismount () {
-    this._initialized = false;
     this._changeQueue.push(Commands.GL_REMOVE_MESH);
+    this.onUpdate();
+    this._initialized = false;
 
-    this._requestUpdate();
+    // this._requestUpdate();
 };
 
 /**

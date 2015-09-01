@@ -67,6 +67,7 @@ Light.prototype.setColor = function setColor(color) {
     this._color = color;
     this.queue.push(this.commands.color);
     var rgb = this._color.getNormalizedRGB();
+
     this.queue.push(rgb[0]);
     this.queue.push(rgb[1]);
     this.queue.push(rgb[2]);
