@@ -252,9 +252,7 @@ WebGLRenderer.prototype.setCutoutState = function setCutoutState(path, usesCutou
 
     if (typeof usesCutout === 'object') {
         if (usesCutout.size) {
-            cutout.uniformValues[2][0] = usesCutout.size[0];
-            cutout.uniformValues[2][1] = usesCutout.size[1];
-            cutout.uniformValues[2][2] = usesCutout.size[2];
+            cutout.uniformValues[2] = usesCutout.size.slice();
         }
     }
 
@@ -277,11 +275,11 @@ WebGLRenderer.prototype.getOrSetCutout = function getOrSetCutout(path) {
     }
     else {
         var uniforms = keyValueToArrays({
-            u_opacity: 0,
+            u_opacity: 1,
             u_transform: identity.slice(),
             u_size: [0, 0, 0],
             u_origin: [0, 0, 0],
-            u_baseColor: [0, 0, 0, 1]
+            u_baseColor: [0, 0, 1, 1]
         });
 
         this.cutoutRegistryKeys.push(path);

@@ -166,7 +166,7 @@ Program.prototype.registerMaterial = function registerMaterial(name, material) {
 
         // I'm sorry
 
-        if (uniforms.keys.indexOf(k) === -1 && k === 'u_matrices[5]') {
+        if (uniforms.keys.indexOf(k) === -1 && k !== 'u_boneMatrices[5]') {
             uniforms.keys.push(k);
             uniforms.values.push(compiled.uniforms[k]);
         }
