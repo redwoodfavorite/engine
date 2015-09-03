@@ -558,12 +558,25 @@ DOMRenderer.prototype.setWidth = function setWidth(width) {
     this._assertTargetLoaded();
 
     var contentWrapper = this._target.content;
+    var target = this._target;
+    var path = this._path;
 
     if (width === false) {
         this._target.explicitWidth = true;
         if (contentWrapper) contentWrapper.style.width = '';
         width = contentWrapper ? contentWrapper.offsetWidth : 0;
         this._target.element.style.width = width + 'px';
+
+        setTimeout(function() {
+                if (contentWrapper) contentWrapper.style.width = '';
+                width = contentWrapper ? contentWrapper.offsetWidth : 0;
+                target.element.style.width = width + 'px';
+                target.size[0] = width;
+
+                this._compositor.sendEvent(path, 'resize', { val: target.size} );
+            }.bind(this),
+        200);
+
     }
     else {
         this._target.explicitWidth = false;
@@ -591,12 +604,24 @@ DOMRenderer.prototype.setHeight = function setHeight(height) {
     this._assertTargetLoaded();
 
     var contentWrapper = this._target.content;
+    var target = this._target;
+    var path = this._path;
 
     if (height === false) {
         this._target.explicitHeight = true;
         if (contentWrapper) contentWrapper.style.height = '';
         height = contentWrapper ? contentWrapper.offsetHeight : 0;
         this._target.element.style.height = height + 'px';
+
+        setTimeout(function() {
+                if (contentWrapper) contentWrapper.style.height = '';
+                height = contentWrapper ? contentWrapper.offsetHeight : 0;
+                target.element.style.height = height + 'px';
+
+                target.size[1] = height;
+                this._compositor.sendEvent(path, 'resize', { val: target.size });
+            }.bind(this),
+        200);
     }
     else {
         this._target.explicitHeight = false;

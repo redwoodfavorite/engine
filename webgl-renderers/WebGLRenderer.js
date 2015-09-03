@@ -223,6 +223,7 @@ WebGLRenderer.prototype.createMesh = function createMesh(path) {
         u_flatShading: 0,
         u_glossiness: [0, 0, 0, 0]
     });
+
     this.meshRegistry[path] = {
         depth: null,
         uniformKeys: uniforms.keys,
@@ -275,11 +276,12 @@ WebGLRenderer.prototype.getOrSetCutout = function getOrSetCutout(path) {
     }
     else {
         var uniforms = keyValueToArrays({
-            u_opacity: 1,
+            u_opacity: 0,
             u_transform: identity.slice(),
             u_size: [0, 0, 0],
             u_origin: [0, 0, 0],
-            u_baseColor: [0, 0, 1, 1]
+            u_baseColor: [0, 0, 0, 1],
+            u_positionOffset: [0, 0, 0]
         });
 
         this.cutoutRegistryKeys.push(path);
